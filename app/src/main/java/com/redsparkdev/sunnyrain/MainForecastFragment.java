@@ -42,18 +42,14 @@ public class MainForecastFragment extends Fragment {
     }
     public boolean onOptionsItemSelected(MenuItem item){
         int id = item.getItemId();
+        /*
         if(id == R.id.acion_refresh) {
             FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
             fetchWeatherTask.execute("210077");
         }
+        */
         return super.onOptionsItemSelected(item);
     }
-
-
-    /**
-     * Returns a new instance of this fragment for the given section
-     * number.
-     */
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -75,15 +71,15 @@ public class MainForecastFragment extends Fragment {
 
         List<String> weekForecast = new ArrayList<>(Arrays.asList(forecastArray));
 
-        ArrayAdapter<String> forecastAdapter = new ArrayAdapter<>(
+        ArrayAdapter<String> mForecastAdapter = new ArrayAdapter<String>(
                 getActivity(),
                 R.layout.list_item_forecast,
-                R.id.list_item_forecast_textview,
+                R.id.list_item_forecast_text_view,
                 weekForecast);
 
         View rootView = inflater.inflate(R.layout.forecast_fragment_main, container, false);
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
-        listView.setAdapter(forecastAdapter);
+        listView.setAdapter(mForecastAdapter);
 
         return rootView;
     }
