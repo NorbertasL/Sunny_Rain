@@ -20,10 +20,18 @@ import java.util.GregorianCalendar;
 /**
  * Created by Red_Spark on 07/09/2016.
  */
-class FetchWeather extends AsyncTask<String, Void, String[]> {
-    private final String LOG_TAG = FetchWeather.class.getSimpleName();
+public class FetchWeatherTask extends AsyncTask<String ,Void, String[]> {
 
-    private static String formatHighLows(double high, double low) {//removed the decimal and formats
+    private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
+    private MainForecastFragment mainForecastFragment;
+
+    //this is the method that calls all internal AsyncTasks
+    public void updateWeatherData(String locations, MainForecastFragment mff){
+        mainForecastFragment = mff;
+        this.execute(locations);
+    }
+
+    private  String formatHighLows(double high, double low) {//removed the decimal and formats
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);
 
@@ -32,7 +40,7 @@ class FetchWeather extends AsyncTask<String, Void, String[]> {
     }
 
     //formats the weather data
-    public String[] getWeatherDataFromJson(String forecastJsonStr, int numDays) throws JSONException {
+    private String[] getWeatherDataFromJson(String forecastJsonStr, int numDays) throws JSONException {
 
         // These are the names of the JSON objects that need to be extracted.
         //We are using http://developer.accuweather.com/ for our api
@@ -77,7 +85,6 @@ class FetchWeather extends AsyncTask<String, Void, String[]> {
             Log.v(LOG_TAG, "Forecast entry:"+s);
         }
         return resultStrs;
-
     }
 
     protected String[] doInBackground(String... params) {
@@ -149,6 +156,11 @@ class FetchWeather extends AsyncTask<String, Void, String[]> {
             e.printStackTrace();
         }
         return null;
+    }
 
+    protected void onPostExecute(String[] result) {
+        if(result != null) {
+            mainForecastFragment.updateForecastAdapter(result);
+        }
     }
 }

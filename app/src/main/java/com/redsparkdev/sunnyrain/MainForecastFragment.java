@@ -18,6 +18,16 @@ import java.util.List;
  * Created by Red_Spark on 24/08/2016.
  */
 public class MainForecastFragment extends Fragment {
+    private final String LOG_TAG = MainForecastFragment.class.getSimpleName();
+    private ArrayAdapter<String> mForecastAdapter;
+
+    private String [] forecastArray = {//Just an initial array
+            "Loading forecast",
+            "Loading forecast",
+            "Loading forecast",
+            "Loading forecast",
+            "Loading forecast",
+    };
     public MainForecastFragment(){}
 
 
@@ -34,8 +44,8 @@ public class MainForecastFragment extends Fragment {
         int id = item.getItemId();
 
         if(id == R.id.acion_refresh) {
-            FetchWeather fetchWeatherTask = new FetchWeather();
-            fetchWeatherTask.execute("210077");
+            FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
+            fetchWeatherTask.updateWeatherData("210077", this);//refreshes weather data(this is only for testing)
         }
 
         return super.onOptionsItemSelected(item);
@@ -46,23 +56,10 @@ public class MainForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
 
 
-
-        //Fake Data for testing
-        String [] forecastArray = {
-                    "Mon 08/22 - Sunny - 31/17",
-                    "Tue 08/23 - Foggy - 21/8",
-                    "Wed 08/24 - Cloudy - 22/17",
-                    "Thurs 08/25 - Rainy - 18/11",
-                    "Fri 08/26 - Foggy - 21/10",
-                    "Sat 08/27 - Raining Meteors - 23/18",
-                    "Sun 08/28 - Sunny - 20/7",
-
-            };
-
         List<String> weekForecast = new ArrayList<>(Arrays.asList(forecastArray));
 
 
-        ArrayAdapter<String> mForecastAdapter = new ArrayAdapter<String>(
+         mForecastAdapter = new ArrayAdapter<>(
                 getActivity(),
                 R.layout.list_item_forecast,
                 R.id.list_item_forecast_text_view,
@@ -74,7 +71,13 @@ public class MainForecastFragment extends Fragment {
 
         return rootView;
     }
+    //method to update the mForecastAdapter
+    public void updateForecastAdapter(String [] s){
+        mForecastAdapter.clear();
+        mForecastAdapter.addAll(s);
+    }
 
 }
+
 
 
