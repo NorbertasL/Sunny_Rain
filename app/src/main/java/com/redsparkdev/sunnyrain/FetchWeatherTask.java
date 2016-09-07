@@ -21,8 +21,9 @@ import java.util.GregorianCalendar;
  * Created by Red_Spark on 07/09/2016.
  */
 public class FetchWeatherTask extends AsyncTask<String ,Void, String[]> {
+    int daysInForecast = 5;
 
-    private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
+    private final String LOG_TAG = FetchWeatherTask.class.getName();
     private MainForecastFragment mainForecastFragment;
 
     //this is the method that calls all internal AsyncTasks
@@ -31,11 +32,11 @@ public class FetchWeatherTask extends AsyncTask<String ,Void, String[]> {
         this.execute(locations);
     }
 
-    private  String formatHighLows(double high, double low) {//removed the decimal and formats
+    private  String formatHighLows(double high, double low, String unit) {//removed the decimal and formats
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);
 
-        String highLowStr = roundedHigh + "/" + roundedLow;
+        String highLowStr = roundedHigh + "/" + roundedLow+" "+unit;
         return highLowStr;
     }
 
@@ -49,6 +50,7 @@ public class FetchWeatherTask extends AsyncTask<String ,Void, String[]> {
         final String ACC_MIN = "Minimum";
         final String ACC_MAX = "Maximum";
         final String ACC_VALUE = "Value";
+        final String ACC_UNIT = "Unit";
 
         //string that stores all the formatted results from JSON
 
@@ -63,21 +65,25 @@ public class FetchWeatherTask extends AsyncTask<String ,Void, String[]> {
             String day, highAndLow;
             JSONObject dayForecast = forecastArray.getJSONObject(i);
 
-            //add i dates to current date of calendar
-            gc.add(GregorianCalendar.DATE, i);
-            //get that date, format it, and "save" it on variable day
-            Date time = gc.getTime();
-            SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
-            day = shortenedDateFormat.format(time);
-
             JSONObject temperatureObject = dayForecast.getJSONObject(ABC_TEMPERATURE);
             JSONObject highObject = temperatureObject.getJSONObject(ACC_MAX);
             JSONObject lowObject = temperatureObject.getJSONObject(ACC_MIN);
+            String unit = highObject.getString(ACC_UNIT);
             double highValue = highObject.getDouble(ACC_VALUE);
             double lowValue = lowObject.getDouble(ACC_VALUE);
 
-            highAndLow = formatHighLows(highValue, lowValue);
-            resultStrs[i] = day +"-"+highAndLow;
+            highAndLow = formatHighLows(highValue, lowValue, unit);
+
+
+            //get that date, format it, and "save" it on variable day
+            Date time = gc.getTime();
+
+            gc.add(GregorianCalendar.DATE, 1);//+one day
+            SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE:MMM-dd");
+            day = shortenedDateFormat.format(time);
+
+            resultStrs[i] = day +"  "+highAndLow;
+
 
 
         }
@@ -105,7 +111,7 @@ public class FetchWeatherTask extends AsyncTask<String ,Void, String[]> {
             String locationParameter = "";
             String forecast5dayParameter = "forecasts/v1/daily/5day/";
             String locationID = params[0];
-            String metricParameter = "&metric=true/";
+            String metricParameter = "&metric=true";
 
             URL url = new URL(mainUrl.toString() + forecast5dayParameter + locationID + apyKey + metricParameter);
 
@@ -133,6 +139,7 @@ public class FetchWeatherTask extends AsyncTask<String ,Void, String[]> {
 
             forecastJsonStr = buffer.toString();
             Log.v(LOG_TAG, "Forecast JSON String:" + forecastJsonStr);
+            Log.v(LOG_TAG, "URL:"+ url.toString());
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
             // If the code didn't successfully get the weather data, there's no point in attemping
@@ -150,7 +157,7 @@ public class FetchWeatherTask extends AsyncTask<String ,Void, String[]> {
             }
         }
         try {
-            return getWeatherDataFromJson(forecastJsonStr, 5);
+            return getWeatherDataFromJson(forecastJsonStr, daysInForecast);
         }catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
